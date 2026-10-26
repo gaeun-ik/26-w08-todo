@@ -1,0 +1,17 @@
+html {
+  color-scheme: light;
+}
+
+body {
+  font-family: ui-rounded, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+
+.filter-button {
+  color: #8b7b80;
+}
+
+.filter-button[aria-pressed="true"] {
+  background: white;
+  color: #e8798f;
+  box-shadow: 0 1px 3px rgb(120 70 85 / 12%);
+}
