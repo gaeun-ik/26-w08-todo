@@ -49,33 +49,41 @@
         </div>
 
         <div class="px-5 py-6 sm:px-9 sm:py-8">
-          <form id="todo-form" class="flex flex-col gap-3 sm:flex-row">
+          <form id="todo-form" class="flex flex-col gap-3">
             <label class="sr-only" for="todo-input">새 할 일</label>
             <input
               id="todo-input"
-              class="min-w-0 flex-1 rounded-xl border border-rose-100 bg-rose-50/40 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-rose-300 focus:bg-white focus:ring-4 focus:ring-rose-100"
+              class="min-w-0 rounded-xl border border-rose-100 bg-rose-50/40 px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-rose-300 focus:bg-white focus:ring-4 focus:ring-rose-100"
               type="text"
               maxlength="50"
               placeholder="새로운 할 일을 적어보세요"
               autocomplete="off"
             />
-            <label class="sr-only" for="importance-input">중요도</label>
-            <select
-              id="importance-input"
-              class="rounded-xl border border-rose-100 bg-white px-3 py-3 text-sm text-slate-600 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100"
-            >
-              <option value="high">중요도 높음</option>
-              <option value="medium" selected>중요도 보통</option>
-              <option value="low">중요도 낮음</option>
-            </select>
-            <button
-              class="rounded-xl bg-rose-400 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-200 active:scale-[0.98]"
-              type="submit"
-            >
-              추가하기 <span aria-hidden="true">＋</span>
-            </button>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
+              <label class="flex items-center gap-3 rounded-xl border border-rose-100 bg-white px-4 py-2 text-sm text-slate-500">
+                <span class="shrink-0 font-semibold">마감일</span>
+                <input id="deadline-input" class="min-w-0 flex-1 bg-transparent text-sm text-slate-600 outline-none" type="date" aria-label="마감일 (선택)" />
+              </label>
+              <div class="flex gap-3">
+                <label class="sr-only" for="importance-input">중요도</label>
+                <select
+                  id="importance-input"
+                  class="min-w-0 flex-1 rounded-xl border border-rose-100 bg-white px-3 py-3 text-sm text-slate-600 outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-100 sm:flex-none"
+                >
+                  <option value="high">중요도 높음</option>
+                  <option value="medium" selected>중요도 보통</option>
+                  <option value="low">중요도 낮음</option>
+                </select>
+                <button
+                  class="flex-1 rounded-xl bg-rose-400 px-6 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-200 active:scale-[0.98] sm:flex-none"
+                  type="submit"
+                >
+                  추가하기 <span aria-hidden="true">＋</span>
+                </button>
+              </div>
+            </div>
           </form>
-          <p id="input-hint" class="mt-2 text-xs text-slate-400">최대 50자까지 입력할 수 있어요.</p>
+          <p id="input-hint" class="mt-2 text-xs text-slate-400">최대 50자까지 입력할 수 있어요. 마감일은 선택 입력이에요.</p>
           <p id="storage-message" class="mt-3 hidden rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800" role="alert"></p>
           <p id="form-message" class="mt-2 hidden text-sm text-rose-600" role="alert"></p>
 
@@ -94,5 +102,6 @@
 
       <footer class="mt-5 text-center text-xs text-slate-400">나를 위한 속도로, 하나씩 🌼</footer>
     </main>
+    <div id="flower-confetti" class="flower-confetti" aria-hidden="true"></div>
   </body>
 </html>

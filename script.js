@@ -9,9 +9,11 @@ const importanceClasses = {
   medium: "bg-amber-100 text-amber-700",
   low: "bg-sky-100 text-sky-700",
 };
+const confettiFlowers = ["🌸", "🌼", "🌷", "✿"];
 
 const form = document.querySelector("#todo-form");
 const input = document.querySelector("#todo-input");
+const deadlineInput = document.querySelector("#deadline-input");
 const importanceInput = document.querySelector("#importance-input");
 const list = document.querySelector("#todo-list");
 const count = document.querySelector("#todo-count");
@@ -44,13 +46,21 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
+  const deadline = deadlineInput.value || null;
+  if (deadline && !isValidDeadline(deadline)) {
+    showFormMessage("올바른 마감일을 선택해 주세요.");
+    return;
+  }
+
   todos.push({
     id: createId(),
     text: text.slice(0, 50),
     completed: false,
     importance: importanceInput.value,
+    deadline,
   });
   input.value = "";
+  deadlineInput.value = "";
   clearFormMessage();
   saveTodos();
   render();
@@ -81,7 +91,8 @@ function loadTodos() {
           (typeof todo.id === "string" || typeof todo.id === "number") &&
           typeof todo.text === "string" &&
           typeof todo.completed === "boolean" &&
-          Object.hasOwn(importanceLabels, todo.importance),
+          Object.hasOwn(importanceLabels, todo.importance) &&
+          (todo.deadline === undefined || todo.deadline === null || isValidDeadline(todo.deadline)),
       )
     ) {
       throw new TypeError("저장된 할 일 데이터의 형식이 올바르지 않습니다.");
@@ -107,6 +118,22 @@ function saveTodos() {
 function createId() {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function isValidDeadline(deadline) {
+  if (typeof deadline !== "string") return false;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(deadline);
+  if (!match) return false;
+
+  const [, yearValue, monthValue, dayValue] = match;
+  const year = Number(yearValue);
+  const month = Number(monthValue);
+  const day = Number(dayValue);
+  if (year < 1 || month < 1 || month > 12) return false;
+
+  const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day >= 1 && day <= daysInMonth[month - 1];
 }
 
 function render() {
@@ -186,13 +213,16 @@ function createTodoItem(todo) {
   checkbox.setAttribute("aria-label", `${todo.text} 완료 여부`);
   checkbox.className = "h-5 w-5 shrink-0 cursor-pointer accent-rose-400";
   checkbox.addEventListener("change", () => {
+    if (checkbox.checked) {
+      celebrateCompletion(checkbox);
+    }
     todo.completed = checkbox.checked;
     saveTodos();
     render();
   });
 
   const text = document.createElement("span");
-  text.className = `min-w-0 flex-1 break-words text-sm ${
+  text.className = `min-w-0 break-words text-sm ${
     todo.completed ? "text-slate-400 line-through" : "text-slate-700"
   }`;
   text.textContent = todo.text;
@@ -200,6 +230,17 @@ function createTodoItem(todo) {
   const badge = document.createElement("span");
   badge.className = `shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${importanceClasses[todo.importance]}`;
   badge.textContent = importanceLabels[todo.importance];
+
+  const details = document.createElement("div");
+  details.className = "flex min-w-0 flex-1 flex-col gap-1";
+  details.append(text);
+  if (todo.deadline) {
+    const deadline = document.createElement("span");
+    const [, year, month, day] = /^(\d{4})-(\d{2})-(\d{2})$/.exec(todo.deadline);
+    deadline.className = "text-xs text-slate-400";
+    deadline.textContent = `마감 ${Number(year)}년 ${Number(month)}월 ${Number(day)}일`;
+    details.append(deadline);
+  }
 
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
@@ -213,8 +254,32 @@ function createTodoItem(todo) {
     render();
   });
 
-  item.append(checkbox, text, badge, deleteButton);
+  item.append(checkbox, details, badge, deleteButton);
   return item;
+}
+
+function celebrateCompletion(checkbox) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const confetti = document.querySelector("#flower-confetti");
+  const bounds = checkbox.getBoundingClientRect();
+  const originX = bounds.left + bounds.width / 2;
+  const originY = bounds.top + bounds.height / 2;
+
+  for (let index = 0; index < 18; index += 1) {
+    const flower = document.createElement("span");
+    const angle = (Math.PI * 2 * index) / 18 + Math.random() * 0.25;
+    const distance = 45 + Math.random() * 90;
+    flower.className = "flower-particle";
+    flower.textContent = confettiFlowers[index % confettiFlowers.length];
+    flower.style.left = `${originX}px`;
+    flower.style.top = `${originY}px`;
+    flower.style.setProperty("--flower-x", `${Math.cos(angle) * distance}px`);
+    flower.style.setProperty("--flower-y", `${Math.sin(angle) * distance - 20}px`);
+    flower.style.setProperty("--flower-rotation", `${Math.random() * 300 - 150}deg`);
+    flower.addEventListener("animationend", () => flower.remove(), { once: true });
+    confetti.append(flower);
+  }
 }
 
 function createEmptyState(title, subtitle) {
